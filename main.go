@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"ggpoker/deck"
 	p2p "ggpoker/p2p"
 	"time"
 )
@@ -27,5 +26,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Println(deck.New())
+	select {} // for blocking, to keep connection live for now
+
+	// fmt.Println(deck.New())
 }
