@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
 	p2p "ggpoker/p2p"
+	"log"
 	"time"
 )
 
 func main() {
 	cfg := p2p.ServerConfig{
-		Version:    "GGPOKER V0.1-alpha",
-		ListenAddr: ":3000",
+		Version:     "GGPOKER V0.1-alpha",
+		ListenAddr:  ":3000",
+		GameVariant: p2p.TexasHoldem,
 	}
 	server := p2p.NewServer(cfg)
 	go server.Start()
@@ -17,13 +18,14 @@ func main() {
 	time.Sleep(1 * time.Second)
 
 	remoteCfg := p2p.ServerConfig{
-		Version:    "GGPOKER V0.1-alpha",
-		ListenAddr: ":4000",
+		Version:     "GGPOKER V0.1-alpha",
+		ListenAddr:  ":4000",
+		GameVariant: p2p.TexasHoldem,
 	}
 	remoteServer := p2p.NewServer(remoteCfg)
 	go remoteServer.Start()
 	if err := remoteServer.Connect(":3000"); err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	select {} // for blocking, to keep connection live for now

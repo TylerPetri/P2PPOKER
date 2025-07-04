@@ -15,7 +15,8 @@ type Message struct {
 }
 
 type Peer struct {
-	conn net.Conn
+	conn     net.Conn
+	outbound bool
 }
 
 func (p *Peer) Send(b []byte) error {
@@ -73,7 +74,8 @@ func (t *TCPTransport) ListenAndAccept() error {
 			continue
 		}
 		peer := &Peer{
-			conn: conn,
+			conn:     conn,
+			outbound: false,
 		}
 
 		t.AddPeer <- peer
