@@ -69,8 +69,9 @@ func (s *Server) Start() {
 	go s.loop()
 
 	logrus.WithFields(logrus.Fields{
-		"port":    s.ListenAddr,
-		"variant": s.GameVariant,
+		"port":       s.ListenAddr,
+		"variant":    s.GameVariant,
+		"gameStatus": s.gameState.gameStatus,
 	}).Info("started new game server")
 
 	s.transport.ListenAndAccept()
@@ -80,6 +81,7 @@ func (s *Server) SendHandshake(p *Peer) error {
 	hs := &Handshake{
 		GameVariant: s.GameVariant,
 		Version:     s.Version,
+		GameStatus:  s.gameState.gameStatus,
 	}
 
 	buf := new(bytes.Buffer)
@@ -115,6 +117,7 @@ func (s *Server) loop() {
 			logrus.WithFields(logrus.Fields{
 				"addr": peer.conn.RemoteAddr(),
 			}).Info("new player disconnected")
+			peer.conn.Close()
 
 			delete(s.peers, peer.conn.RemoteAddr())
 
@@ -124,6 +127,8 @@ func (s *Server) loop() {
 			if err := s.handshake(peer); err != nil {
 				logrus.Errorf("handshake with incoming player failed: %s", err)
 				peer.conn.Close()
+				delete(s.peers, peer.conn.RemoteAddr())
+
 				continue
 			}
 
@@ -151,11 +156,6 @@ func (s *Server) loop() {
 	}
 }
 
-type Handshake struct {
-	Version     string
-	GameVariant GameVariant
-}
-
 func (s *Server) handshake(p *Peer) error {
 	hs := &Handshake{}
 	if err := gob.NewDecoder(p.conn).Decode(hs); err != nil {
@@ -163,7 +163,7 @@ func (s *Server) handshake(p *Peer) error {
 	}
 
 	if s.GameVariant != hs.GameVariant {
-		return fmt.Errorf("invalid gamevariant %s", hs.GameVariant)
+		return fmt.Errorf("game variant does not match %s", hs.GameVariant)
 	}
 	if s.Version != hs.Version {
 		return fmt.Errorf("invalid version %s", hs.Version)

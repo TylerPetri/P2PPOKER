@@ -28,6 +28,17 @@ func main() {
 		log.Fatal(err)
 	}
 
+	otherCfg := p2p.ServerConfig{
+		Version:     "GGPOKER V0.1-alpha",
+		ListenAddr:  ":3001",
+		GameVariant: p2p.TexasHoldem,
+	}
+	otherServer := p2p.NewServer(otherCfg)
+	go otherServer.Start()
+	if err := otherServer.Connect(":4000"); err != nil {
+		log.Fatal(err)
+	}
+
 	select {} // for blocking, to keep connection live for now
 
 	// fmt.Println(deck.New())

@@ -3,16 +3,10 @@ package p2p
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"net"
 
 	"github.com/sirupsen/logrus"
 )
-
-type Message struct {
-	Payload io.Reader
-	From    net.Addr
-}
 
 type Peer struct {
 	conn     net.Conn
